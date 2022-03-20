@@ -9,7 +9,13 @@ export class Service {
     title: string;
 
     @Prop()
+    email: string;
+
+    @Prop()
     description: string;
+
+    @Prop({required:true})
+    createdAt: Date
 }
 
 export const ServiceSchema = SchemaFactory.createForClass(Service);
