@@ -22,7 +22,7 @@ export class AuthService {
         if (!(user && isPasswordMatch)){
             throw new UnauthorizedException();
         }
-        
+                
         // const {username, password, ...rest} = user;
         return user;
     } 
@@ -32,7 +32,10 @@ export class AuthService {
 
         const payload = {
             name: user.name, 
-            sub: user.id
+            sub: {
+                id:  user.id,
+                roles: user.roles
+            }
         }
 
         return { access_token: this.jwtService.sign(payload) }
