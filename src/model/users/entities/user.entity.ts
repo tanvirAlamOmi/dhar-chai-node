@@ -13,7 +13,10 @@ export class User {
 
     @Prop()
     password: string;
-
+    
+    @Prop()
+    roles: string;
+    
     @Prop()
     createdAt: Date;
 }

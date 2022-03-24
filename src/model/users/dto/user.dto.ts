@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsString } from "class-validator";
 
 export class UserDto {
     @IsString()
@@ -9,6 +9,9 @@ export class UserDto {
 
     @IsString()
     password: string;
+
+    @IsString()
+    roles: string;
     
     @IsNotEmpty()
     createdAt: Date;

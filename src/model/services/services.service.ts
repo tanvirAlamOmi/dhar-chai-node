@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Service, ServiceDocument } from './schemas/service.schema';
+import { Service, ServiceDocument } from './entities/service.entity';
 import { Model } from 'mongoose'
 import { ServiceDto } from './dto';
 
