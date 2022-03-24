@@ -1,0 +1,2 @@
+[ ] get user object in roles.guard.ts and delete dummy static user object
+[ ] take secrets from env to auth and db
