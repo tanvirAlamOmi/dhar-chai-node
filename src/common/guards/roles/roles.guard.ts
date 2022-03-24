@@ -3,7 +3,7 @@ import { Reflector } from "@nestjs/core";
 import { Role } from "src/common/enums";
 
 @Injectable()
-export class RolesGueard implements CanActivate {
+export class RolesGuard implements CanActivate {
     constructor(private reflector: Reflector) {}
 
     canActivate(context: ExecutionContext): boolean  {
@@ -16,15 +16,7 @@ export class RolesGueard implements CanActivate {
         if (!requiredRoles) return true;
 
         const { user } = context.switchToHttp().getRequest();
-        // let user = {
-        //     name: "fuckBoy",
-        //     roles: "user"
-        // }
-        // console.log(user);
         
-
-        return requiredRoles.some(role => user.roles?.includes(role));
-
-        return true;
+        return requiredRoles.some(role => user.info.roles?.includes(role));
     }
 }

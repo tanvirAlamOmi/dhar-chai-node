@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, UseGuards, Request, Param, Patch, Put, Del
 import { Roles } from 'src/common/decorators/metadatas';
 import { Role } from 'src/common/enums';
 import { JwtAuthGuard } from 'src/common/guards/auth';
+import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { UserDto } from './dto';
 import { User } from './entities';
 import { UsersService } from './users.service';
@@ -11,13 +12,14 @@ export class UsersController {
     constructor( private readonly service: UsersService ) {}
 
     @Get()
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN, Role.USER)
     async get(): Promise<User[]> {
         return await this.service.findAll(); 
     } 
     
     @Get(':id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     async getById(@Param('id') id: string): Promise<User> {
         return await this.service.findOne(id);
