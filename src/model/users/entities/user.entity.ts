@@ -3,7 +3,7 @@ import { Document } from 'mongoose'
 
 export type UserDocument = User & Document
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
     @Prop({required:true})
     name: string;
@@ -16,9 +16,9 @@ export class User {
     
     @Prop()
     roles: string;
-    
+
     @Prop()
-    createdAt: Date;
+    refreshToken: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

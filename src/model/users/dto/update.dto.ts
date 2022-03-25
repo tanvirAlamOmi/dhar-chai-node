@@ -1,18 +1,21 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
-export class UserDto {
-    @IsString()
+export class UpdateDto {
+    @IsOptional()
     name: string;
 
-    @IsString()
+    @IsOptional()
     username: string;
 
-    @IsString()
+    @IsOptional()
     password: string;
 
-    @IsString()
+    @IsOptional()
     roles: string;
-
+    
     @IsOptional()
     refreshToken: string;
+    
+    @IsOptional()
+    createdAt: Date;
 }
