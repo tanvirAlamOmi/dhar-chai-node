@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Post, UseGuards, Request, Param, Patch, Put, Delete } from '@nestjs/common';
 import { Roles } from 'src/common/decorators/metadatas';
 import { Role } from 'src/common/enums';
-import { JwtAuthGuard } from 'src/common/guards/auth';
+import { JwtAccessAuthGuard } from 'src/common/guards/auth/jwt';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
-import { UserDto } from './dto';
+import { UpdateDto, UserDto } from './dto';
 import { User } from './entities';
 import { UsersService } from './users.service';
 
@@ -12,27 +12,22 @@ export class UsersController {
     constructor( private readonly service: UsersService ) {}
 
     @Get()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAccessAuthGuard, RolesGuard)
     @Roles(Role.ADMIN, Role.USER)
     async get(): Promise<User[]> {
         return await this.service.findAll(); 
     } 
     
     @Get(':id')
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(JwtAccessAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     async getById(@Param('id') id: string): Promise<User> {
         return await this.service.findOne(id);
     }
 
-    @Post()
-    async create(@Body() userDto: UserDto): Promise<User> {
-        return await this.service.create(userDto);
-    }
-
     @Patch(':id')
-    async update(@Param('id') id: string, @Body() userDto: UserDto): Promise<User> {
-        return await this.service.update(id, userDto);
+    async update(@Param('id') id: string, @Body() UpdateDto: UpdateDto): Promise<User> {
+        return await this.service.update(id, UpdateDto);
     }
 
     @Put(':id')
