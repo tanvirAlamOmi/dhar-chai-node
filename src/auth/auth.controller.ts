@@ -1,18 +1,34 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/common/guards/auth';
+import { JwtAccessAuthGuard } from 'src/common/guards/auth/jwt';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto';
+import { LoginDto, SignupDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) {}
+    constructor(private readonly service: AuthService) {}
 
-    @Post()
-    async login( @Body() loginDto: LoginDto){
-        return this.authService.login(loginDto);
+    @Post('signup')
+    async signup( @Body() signupDto: SignupDto ) {
+        return this.service.signup(signupDto);
     }
 
-    @UseGuards(JwtAuthGuard)
+    @Post('login')
+    async login( @Body() loginDto: LoginDto){
+        return this.service.login(loginDto);
+    }
+
+    @Post('logout')
+    async logout() {
+        return this.service.logout();
+
+    }
+
+    @Post('refresh')
+    async refreshTokens() {
+        return this.service.refreshTokens();
+    }
+
+    @UseGuards(JwtAccessAuthGuard)
     @Get()
     async test() {
         return "sejuti";
