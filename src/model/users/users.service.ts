@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './entities';
 import { Model } from 'mongoose'
-import { UserDto } from './dto';
+import { UpdateDto, UserDto } from './dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -28,8 +28,7 @@ export class UsersService {
     async create(userDto: UserDto): Promise<User> {
         let {password, ...rest} = userDto;
 
-        const saltOrRounds = await bcrypt.genSalt();
-        const hash = await bcrypt.hash(password, saltOrRounds);
+        const hash = await this.bcryptHash(password);
         
         return await new this.model({
           ...rest,
@@ -38,13 +37,12 @@ export class UsersService {
         }).save();
     }
 
-    async update(id: string, userDto: UserDto): Promise<UserDto> {
-        let user = await this.model.findByIdAndUpdate(id, userDto).exec();
+    async update(id: string, updateDto: any): Promise<UserDto> {
+        let user = await this.model.findOneAndUpdate({_id: id}, {$set: updateDto}, {new: true}).exec();
         if(!user) throw new NotFoundException('could not find the user.')
         return user;
     }
 
-    
     async replace(id: string, userDto: UserDto): Promise<UserDto> {
         let user = await this.model.findOneAndReplace({id}, userDto).exec();
         if(!user) throw new NotFoundException('could not find the user.')
@@ -55,5 +53,17 @@ export class UsersService {
         let user = await this.model.findByIdAndDelete(id).exec();
         if(!user) throw new NotFoundException('could not find the user.')
         return user;
+    }
+
+    async updateRefreshToken( userId: string, tokens: any) {
+        
+        const refreshToken = tokens ?  await this.bcryptHash(tokens.refresh_token) : null;
+        
+        await this.update(userId, {refreshToken});
+    }
+
+    async bcryptHash (plainText: string): Promise<string> {
+        const saltOrRounds = await bcrypt.genSalt();
+        return await bcrypt.hash(plainText, saltOrRounds);
     }
 }

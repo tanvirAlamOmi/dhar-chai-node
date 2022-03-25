@@ -1,8 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { log } from 'console';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/model/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDto } from './dto';
+import { LoginDto, SignupDto } from './dto';
 import { User } from 'src/model/users/entities';
 import * as bcrypt from 'bcrypt';
 
@@ -11,7 +10,7 @@ export class AuthService {
     constructor(
         private userService: UsersService,
         private jwtService: JwtService
-    ){}
+    ) {}
 
     async validateUser(loginDto: LoginDto): Promise<any> {
         const { username, password } = loginDto;        
@@ -27,17 +26,70 @@ export class AuthService {
         return user;
     } 
 
-    async login(loginDto: LoginDto): Promise<{}> {
-        const user = await this.validateUser(loginDto);
-
+    async getTokens(user: any): Promise<{}> { //should get User type & return token type
         const payload = {
-            name: user.name, 
-            sub: {
-                id:  user.id,
+            sub: user.id, 
+            info: {
+                name:  user.name,
                 roles: user.roles
             }
         }
 
-        return { access_token: this.jwtService.sign(payload) }
+        const [accessToken, refreshTokens] = await Promise.all([
+            this.jwtService.signAsync(
+                payload,
+                {
+                    secret: 'secret',
+                    expiresIn: '15m',
+                },
+            ),
+            this.jwtService.signAsync(
+                payload,
+                {
+                    secret: 'secret',
+                    expiresIn: '2w',
+                }
+            )
+        ])
+
+        return { 
+            access_token: accessToken,
+            refresh_token: refreshTokens,
+        }
+
+    }
+
+    async login(loginDto: LoginDto): Promise<{}> {
+        const user = await this.validateUser(loginDto);
+        const tokens =  await this.getTokens(user);
+        await this.userService.updateRefreshToken(user, tokens);
+        return tokens;
+    }
+
+    async signup(signup: SignupDto): Promise<{}> {
+        const user =  await this.userService.create(signup);
+        const tokens =  await this.getTokens(user);
+        await this.userService.updateRefreshToken(user['id'], tokens);
+        return tokens;
+    }
+
+    async logout(userId: string) {
+        const tokens = null;
+        await this.userService.updateRefreshToken(userId, tokens);
+        return 'logged out';
+    }
+    
+    async refreshTokens(userToken: any) {
+        const {sub, refreshToken} = userToken;
+        const user = await this.userService.findOne(sub);
+        if (!user || user.refreshToken) throw new ForbiddenException();
+        
+        const isMatched = await bcrypt.compare(refreshToken, user.refreshToken);
+
+        if( !isMatched) throw new ForbiddenException();
+
+        const tokens =  await this.getTokens(user);
+        await this.userService.updateRefreshToken(user['id'], tokens);
+        return tokens;
     }
 }

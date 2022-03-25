@@ -1,1 +1,1 @@
-// logged in users
+export * from './get-current-user.decorator';
