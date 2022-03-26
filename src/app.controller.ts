@@ -1,18 +1,17 @@
 import { Controller, Get } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppService } from './app.service';
+import { Public } from './common/decorators/metadatas/auth';
 
 @Controller()
 export class AppController {
   constructor(
-    private readonly appService: AppService, 
-    private configService: ConfigService
+    private readonly appService: AppService
   ) {}
 
+  @Public()
   @Get()
   getHello(): string {
-    console.log(this.configService.get<string>('Q'));
-    
     return this.appService.getHello();
   }
 }
